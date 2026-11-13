@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player activity</title>
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<main id="app" class="shell">
+ <header class="heading"><h1>Player activity</h1><p class="notice">Demo data · Fictional players</p></header>
+ <p id="data-error" class="data-error" role="alert" hidden></p>
+ <div class="controls">
+  <label class="control">Player<select id="player"></select></label>
+  <div class="control"><span>Season</span><div class="season-buttons" id="seasons" role="group" aria-label="Season"></div></div>
+  <label class="control">Compare with<select id="reference"></select></label>
+ </div>
+ <div class="layout">
+  <section class="panel" aria-label="Season heatmaps">
+   <div class="map-title"><h2>Action locations</h2><p class="small">Drag on either pitch to compare an area.</p></div>
+   <div class="pitches">
+    <div><div class="field-label"><span class="season-name" id="current-label"></span><span class="small">Selected season</span></div>
+     <div class="field" id="field-current" aria-label="Selected season heatmap">
+      <canvas id="heat-current" width="640" height="416" aria-label="Selected season action density"></canvas><svg id="pitch-current" viewBox="0 0 100 65" aria-hidden="true"></svg>
+     </div><div class="directions"><span>Own goal 0%</span><span>Opponent goal 100% →</span></div></div>
+    <div class="reference"><div class="field-label"><span class="season-name" id="reference-label"></span><span class="small">Reference season</span></div>
+     <div class="field" id="field-reference" aria-label="Reference season heatmap">
+      <canvas id="heat-reference" width="640" height="416" aria-label="Reference season action density"></canvas><svg id="pitch-reference" viewBox="0 0 100 65" aria-hidden="true"></svg>
+     </div><div class="directions"><span>Own goal 0%</span><span>Opponent goal 100% →</span></div></div>
+   </div>
+   <div class="scale"><span>Action density</span><div><div class="gradient"></div><div class="scale-values"><span>0%</span><span id="heat-scale-max"></span></div></div><span class="density-unit">Smoothed % of all actions per grid cell.<br>Same scale for every player and season.</span></div>
+   <div class="selection-tools"><label class="control">Select an area<select id="region"><option value="whole">Whole field</option><option value="defensive">Defensive third</option><option value="middle">Middle third</option><option value="attacking">Attacking third</option><option value="upper">Top sideline area</option><option value="lower">Bottom sideline area</option><option value="custom" disabled>Custom rectangle</option></select></label><button id="clear">Reset area</button></div>
+   <p id="selection-summary" class="selection-summary" aria-live="polite"></p>
+   <p class="axes">Coordinates are field percentages, not metres. Width runs from 0% at the top sideline to 100% at the bottom.</p>
+  </section>
+  <aside>
+   <section class="panel" aria-label="Linked passing and shooting comparison">
+    <div class="stats-title"><h2>Passing and shooting</h2><span class="scope" id="stats-scope">Whole field</span></div>
+    <div class="series-legend"><span><i class="key"></i><span id="legend-current"></span></span><span><i class="key ref"></i><span id="legend-reference"></span></span></div>
+    <div id="metrics"></div>
+    <div class="bar-axis"><span>0%</span><span>100%</span></div>
+    <p class="stats-note">Rates use actions starting inside the selected area. No attempts is shown as a dash, not 0%.</p>
+   </section>
+   <section class="panel cell-panel" aria-label="Details on demand">
+    <h2 class="cell-title">Local detail</h2><p class="cell-place" id="cell-place">Hover over either pitch for local counts.</p><div id="cell-details" class="cell-rows"></div>
+   </section>
+  </aside>
+ </div>
+ <p class="footer">All events and percentages are illustrative. Heat shows where ball actions occur, not running paths or time spent in an area.</p>
+</main>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

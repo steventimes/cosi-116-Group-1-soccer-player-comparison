@@ -1,0 +1,129 @@
+:root {
+  --bg:#fff; --text:#1d2925; --muted:#63716a; --line:#dce2dd;
+  --current:#b4552e; --reference:#496a80; --pitch:#2f6449;
+}
+* {box-sizing:border-box}
+body {margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Arial,Helvetica,sans-serif}
+button,select {font:inherit;color:inherit}
+button {cursor:pointer}
+select {height:40px;padding:6px 30px 6px 10px;border:1px solid #b8c3bb;border-radius:2px;background:#fff}
+button:focus-visible,select:focus-visible,[tabindex]:focus-visible {outline:3px solid #245f46;outline-offset:3px}
+.shell {max-width:1440px;margin:auto;padding:28px 34px 20px}
+h1,h2,h3,p {margin:0}
+h1 {font-size:30px;font-weight:600;letter-spacing:-.8px;line-height:1.2}
+h2 {font-size:18px;font-weight:600;letter-spacing:-.2px}
+h3 {font-weight:600}
+.heading {display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:25px}
+.notice {font-size:12px;color:var(--muted)}
+.controls {display:grid;grid-template-columns:170px minmax(0,1fr) 160px;gap:28px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:25px}
+.control {display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);min-width:0}
+.control select {width:100%;font-size:15px;color:var(--text)}
+.season-buttons {display:flex;gap:0;border-bottom:1px solid var(--line);width:max-content;max-width:100%}
+.season-buttons button {border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:var(--muted);padding:9px 12px 10px;font-size:15px;line-height:1.3;margin-bottom:-1px;white-space:nowrap}
+.season-buttons button:hover {color:var(--text);background:#f3f5f2}
+.season-buttons button[aria-pressed=true] {border-bottom-color:var(--current);color:var(--current);font-weight:600}
+.layout {display:grid;grid-template-columns:minmax(0,1fr) 294px;gap:36px;align-items:start}
+.panel {min-width:0}
+.map-title {display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:23px}
+.small {font-size:12px;color:var(--muted)}
+.pitches {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.field-label {display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.season-name {font-size:26px;line-height:1.2;font-weight:500;letter-spacing:-.6px;color:var(--current);font-variant-numeric:tabular-nums}
+.reference .season-name {color:var(--reference)}
+.field {position:relative;aspect-ratio:100/65;background:var(--pitch);touch-action:none;cursor:crosshair;overflow:hidden}
+.field canvas,.field svg {position:absolute;inset:0;width:100%;height:100%}
+.field svg {display:block;overflow:visible}
+.pitch-line {fill:none;stroke:#e2eee5;stroke-opacity:.72;stroke-width:.35}
+.selection {fill:none;stroke:white;stroke-width:.5;stroke-dasharray:1.2 .7;pointer-events:none}
+.hover-cell {fill:#fff2;stroke:white;stroke-width:.35;pointer-events:none}
+.outside {fill:#11261b;opacity:.58;pointer-events:none}
+.directions {display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin-top:7px}
+.scale {display:grid;grid-template-columns:auto minmax(120px,190px) 1fr;gap:12px;align-items:start;font-size:12px;margin-top:22px}
+.scale>span:first-child {line-height:12px}
+.gradient {height:8px;background:linear-gradient(90deg,#2f6449,#95b441,#eed63f,#f38e28,#da401b)}
+.scale-values {display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.density-unit {font-size:11px;color:var(--muted);line-height:1.4;margin-top:-3px}
+.selection-tools {display:flex;align-items:end;gap:16px;padding-top:20px;margin-top:20px;border-top:1px solid var(--line)}
+.selection-tools .control {width:194px;max-width:calc(100% - 106px)}
+.selection-tools button {border:1px solid #b8c3bb;border-radius:2px;background:#fff;padding:8px 13px;height:40px;margin-left:auto;font-size:13px;white-space:nowrap}
+.selection-tools button:hover {border-color:var(--text);background:#f3f5f2}
+.selection-summary {margin-top:17px;font-size:13px;line-height:1.8;min-height:47px;font-variant-numeric:tabular-nums}
+.selection-summary span {color:var(--muted);font-size:12px}
+.axes {font-size:11px;color:var(--muted);margin-top:12px;max-width:650px}
+aside {min-width:0;border-left:1px solid var(--line);padding-left:26px}
+.stats-title {display:flex;justify-content:space-between;gap:10px;align-items:center}
+.scope {font-size:11px;color:var(--muted);text-align:right}
+.series-legend {display:flex;gap:21px;margin:18px 0 23px;font-size:12px}
+.key {display:inline-block;width:7px;height:7px;background:var(--current);margin:0 6px 1px 0}
+.key.ref {background:var(--reference)}
+.metric {border-bottom:1px solid var(--line);padding:0 0 14px;margin-top:17px}
+.metric:first-child {margin-top:0}
+.metric-label {font-size:14px}
+.formula {font-size:11px;color:var(--muted);margin:3px 0 10px}
+.bar-row {display:grid;grid-template-columns:minmax(0,1fr) 64px;align-items:start;gap:12px;margin-top:9px}
+.track {height:7px;background:#edf0ed;margin-top:6px;overflow:hidden}
+.bar {height:100%;background:var(--current)}
+.bar.ref {background:var(--reference)}
+.percentage {font-size:19px;line-height:1.15;letter-spacing:-.5px;text-align:right;font-variant-numeric:tabular-nums}
+.fraction {font-size:11px;line-height:1.5;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.bar-axis {display:flex;justify-content:space-between;padding-right:76px;font-size:10px;color:var(--muted);margin-top:9px}
+.stats-note {font-size:11px;line-height:1.6;color:var(--muted);margin-top:14px}
+.cell-panel {border-top:1px solid var(--line);margin-top:24px;padding-top:17px}
+.cell-title {font-size:14px;font-weight:600;letter-spacing:0}
+.cell-place {font-size:11px;color:var(--muted);margin-top:5px}
+.cell-rows {display:grid;gap:10px;margin-top:12px;font-size:12px;font-variant-numeric:tabular-nums}
+.cell-row strong {font-weight:500;color:var(--current)}
+.cell-row:nth-child(2) strong {color:var(--reference)}
+.cell-row span {font-size:11px;color:var(--muted)}
+.footer {border-top:1px solid var(--line);padding-top:13px;margin-top:26px;font-size:11px;color:var(--muted)}
+[hidden] {display:none!important}
+.data-error {border-left:3px solid #9d3628;padding:12px 15px;margin-bottom:22px;color:#7b261c;background:#fff4ef}
+@media(max-width:1100px) {
+  .shell {padding:24px}
+  .layout {grid-template-columns:minmax(0,1fr) 264px;gap:26px}
+  aside {padding-left:20px}
+  .field-label {display:block}
+  .field-label .small {display:block;margin-top:3px}
+  .pitches {gap:16px}
+  .scale {grid-template-columns:auto minmax(110px,170px)}
+  .density-unit {grid-column:1/-1;margin-top:0}
+}
+@media(max-width:960px) {
+  .layout {grid-template-columns:1fr;gap:28px}
+  aside {border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+  .cell-panel {border-top:0;border-left:1px solid var(--line);margin-top:0;padding:0 0 0 26px}
+  .controls {grid-template-columns:145px minmax(0,1fr) 135px;gap:20px}
+  .season-buttons {width:100%;justify-content:space-between}
+  .season-buttons button {font-size:13px;padding:10px 7px}
+  .field-label {display:flex}
+  .scale {grid-template-columns:auto minmax(140px,200px) 1fr}
+  .density-unit {grid-column:auto;margin-top:-3px}
+}
+@media(max-width:720px) {
+  .shell {padding:20px}
+  .heading {align-items:start;margin-bottom:24px}
+  h1 {font-size:27px}
+  .notice {max-width:130px;text-align:right;font-size:11px}
+  .controls {grid-template-columns:1fr 1fr;gap:15px 22px;padding-bottom:0}
+  .controls>.control:nth-child(2) {grid-column:1/-1;grid-row:2}
+  .season-buttons {border-bottom:0}
+  .season-buttons button {font-size:14px;padding:12px 8px}
+  .controls>.control:nth-child(3) {grid-column:2;grid-row:1}
+  .map-title {display:block;margin-bottom:19px}
+  .map-title>.small {margin-top:4px}
+  .field-label {display:block}
+  .field-label .small {margin-top:3px}
+  .scale {grid-template-columns:auto minmax(100px,1fr)}
+  .density-unit {grid-column:1/-1;margin-top:0}
+}
+@media(max-width:520px) {
+  .shell {padding:19px 17px}
+  .pitches {grid-template-columns:1fr;gap:24px}
+  .field-label {display:flex}
+  .season-buttons button {padding:12px 7px;font-size:13px}
+  .season-name {font-size:25px}
+  aside {grid-template-columns:1fr;gap:22px}
+  .cell-panel {border:0;border-top:1px solid var(--line);padding:18px 0 0}
+  .footer {font-size:11px}
+}
+@media(prefers-reduced-motion:reduce) {* {transition:none!important;scroll-behavior:auto!important}}
