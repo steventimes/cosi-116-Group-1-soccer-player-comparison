@@ -2,3 +2,5 @@ app/artifacts/
 __pycache__/
 *.pyc
 node_modules/
+app/test/
+app/scripts/verify_browser.cjs

@@ -1,8 +1,5 @@
 {
   "name": "cosi116-player-activity",
   "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test test/model.test.js"
-  }
+  "type": "module"
 }

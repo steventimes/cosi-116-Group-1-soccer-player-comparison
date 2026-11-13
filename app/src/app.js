@@ -2,17 +2,13 @@ import {
   AREAS,
   WHOLE_FIELD,
   densityIndex,
-  inside,
-  summarize,
-  validateDataset,
 } from './model.js';
 import { createPitchRenderer } from './pitch.js';
+import { loadDataset } from './data.js';
+import { renderComparison, renderLocalDetails } from './comparison.js';
 
 const element = id => document.getElementById(id);
-const format = (number, digits = 1) => number.toLocaleString('en-US', {
-  minimumFractionDigits: digits,
-  maximumFractionDigits: digits,
-});
+
 function createApplication(data) {
   const state = {
     player: data.players[0].id,
@@ -27,28 +23,8 @@ function createApplication(data) {
   const paintOverlay = (region = state.selection) => pitch.paintOverlay(region, state.hoverCell);
   const profile = season => data.players.find(player => player.id === state.player).profiles.find(item => item.season === season);
 
-  function metric(label, formula, key, denominator, selected, reference) {
-    function row(totals, comparison) {
-      const numerator = totals[key];
-      const count = totals[denominator];
-      const percentage = count ? 100 * numerator / count : null;
-      return `<div class="bar-row"><div><div class="track"><div class="bar ${comparison ? 'ref' : ''}" style="width:${percentage ?? 0}%"></div></div><div class="fraction">${numerator} / ${count}${count ? '' : ' · no attempts'}</div></div><div class="percentage">${percentage === null ? '—' : `${format(percentage)}%`}</div></div>`;
-    }
-    return `<section class="metric" data-metric="${key}" data-current-n="${selected[key]}" data-current-d="${selected[denominator]}" data-reference-n="${reference[key]}" data-reference-d="${reference[denominator]}"><h3 class="metric-label">${label}</h3><p class="formula">${formula}</p>${row(selected, false)}${row(reference, true)}</section>`;
-  }
-
   function updateCell() {
-    if (!state.hoverCell) {
-      element('cell-place').textContent = 'Hover over either pitch for local counts.';
-      element('cell-details').replaceChildren();
-      return;
-    }
-    const cell = state.hoverCell;
-    element('cell-place').textContent = `Length ${cell.x0}–${cell.x1}%, width ${cell.y0}–${cell.y1}%.`;
-    element('cell-details').innerHTML = [state.season, state.reference].map(season => {
-      const totals = summarize(profile(season).events.filter(event => inside(event, state.selection) && inside(event, cell)));
-      return `<div class="cell-row"><strong>${season} · ${totals.n} actions</strong><br><span>Passes ${totals.completed}/${totals.passes} completed · Goals ${totals.goals}/${totals.shots} shots</span></div>`;
-    }).join('');
+    renderLocalDetails(profile(state.season), profile(state.reference), state.selection, state.hoverCell);
   }
 
   function render() {
@@ -56,25 +32,14 @@ function createApplication(data) {
     element('reference-label').textContent = state.reference;
     element('legend-current').textContent = state.season;
     element('legend-reference').textContent = state.reference;
-    element('heat-scale-max').textContent = `${format(maximum, 2)}%`;
+    element('heat-scale-max').textContent = `${maximum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
     document.querySelectorAll('[data-season]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.season === state.season));
     });
     pitch.drawHeat('current', state.player, state.season);
     pitch.drawHeat('reference', state.player, state.reference);
     paintOverlay();
-    const selected = summarize(profile(state.season).events.filter(event => inside(event, state.selection)));
-    const reference = summarize(profile(state.reference).events.filter(event => inside(event, state.selection)));
-    const region = state.selection;
-    const whole = region.x0 === 0 && region.x1 === 100 && region.y0 === 0 && region.y1 === 100;
-    element('stats-scope').textContent = whole ? 'Whole field' : 'Selected area';
-    element('metrics').innerHTML = [
-      metric('Pass completion', 'Completed passes / attempted passes', 'completed', 'passes', selected, reference),
-      metric('Shot conversion', 'Goals / attempted shots', 'goals', 'shots', selected, reference),
-      metric('Shots on target', 'Shots directed within the goal frame / shots', 'onTarget', 'shots', selected, reference),
-    ].join('');
-    const scope = whole ? 'Whole field' : `Selected area · length ${format(region.x0, 0)}–${format(region.x1, 0)}%, width ${format(region.y0, 0)}–${format(region.y1, 0)}%`;
-    element('selection-summary').innerHTML = `${scope}<br><span>${state.season}: ${selected.n} sample actions · ${state.reference}: ${reference.n} sample actions</span>`;
+    renderComparison(profile(state.season), profile(state.reference), state.selection);
     updateCell();
   }
 
@@ -195,9 +160,7 @@ const controls = document.querySelectorAll('button, select');
 controls.forEach(control => { control.disabled = true; });
 let dataset;
 try {
-  const response = await fetch(new URL('../data/demo.json', import.meta.url), { signal: AbortSignal.timeout(10000) });
-  if (!response.ok) throw new Error(`The data file could not be read (${response.status}).`);
-  dataset = validateDataset(await response.json());
+  dataset = await loadDataset();
 } catch (error) {
   const message = element('data-error');
   message.textContent = `Data could not be loaded. ${error.message} Check the data file and reload the page.`;

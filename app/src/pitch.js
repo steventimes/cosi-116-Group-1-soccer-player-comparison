@@ -1,4 +1,4 @@
-import { GRID_HEIGHT, GRID_WIDTH } from './model.js';
+import { GRID_HEIGHT, GRID_WIDTH, isWholeField } from './model.js';
 
 const element = id => document.getElementById(id);
 const palette = [[47, 100, 73], [149, 180, 65], [238, 214, 63], [243, 142, 40], [218, 64, 27]];
@@ -46,7 +46,7 @@ export function createPitchRenderer(grids, maximum) {
   }
 
   function paintOverlay(region, hoverCell) {
-    const whole = region.x0 === 0 && region.y0 === 0 && region.x1 === 100 && region.y1 === 100;
+    const whole = isWholeField(region);
     for (const kind of ['current', 'reference']) {
       const pitch = element(`pitch-${kind}`);
       const outside = pitch.querySelector('.outside');
