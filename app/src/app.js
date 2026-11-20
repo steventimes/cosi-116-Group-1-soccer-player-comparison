@@ -1,7 +1,8 @@
-import { AREAS, WHOLE_FIELD, densityIndex } from "./model.js";
+import { AREAS, WHOLE_FIELD, densityIndex, isWholeField } from "./model.js";
 import { createPitchRenderer } from "./pitch.js";
 import { loadDataset } from "./data.js";
 import { renderComparison, renderLocalDetails } from "./comparison.js";
+import { initializeActionTable, renderActionTable } from "./action-table.js";
 
 const element = (id) => document.getElementById(id);
 
@@ -62,6 +63,17 @@ function createApplication(data) {
       profile(state.season),
       profile(state.reference, state.other),
       state.selection,
+    );
+    // The action table reads the same shared selection as the rates above.
+    renderActionTable(
+      profile(state.season),
+      profile(state.reference, state.other),
+      {
+        current: element("current-label").textContent,
+        reference: element("reference-label").textContent,
+      },
+      state.selection,
+      isWholeField(state.selection) ? "Whole field" : "Selected area",
     );
     updateCell();
   }
@@ -137,7 +149,35 @@ function createApplication(data) {
       state.drag = null;
       paintOverlay();
     });
+    // Keyboard access to local inspection: arrow keys move the same 10% cell
+    // that pointer hover uses, so both input methods show identical details.
+    field.tabIndex = 0;
+    field.setAttribute("role", "group");
+    const moves = {
+      ArrowLeft: [-10, 0],
+      ArrowRight: [10, 0],
+      ArrowUp: [0, -10],
+      ArrowDown: [0, 10],
+    };
+    field.addEventListener("keydown", (event) => {
+      const move = moves[event.key];
+      if (!move) return;
+      event.preventDefault();
+      const cell = state.hoverCell ?? { x0: 40 - move[0], y0: 40 - move[1] };
+      const x = Math.max(0, Math.min(90, cell.x0 + move[0]));
+      const y = Math.max(0, Math.min(90, cell.y0 + move[1]));
+      state.hoverCell = { x0: x, y0: y, x1: x + 10, y1: y + 10 };
+      paintOverlay();
+      updateCell();
+    });
+    field.addEventListener("blur", () => {
+      if (!state.hoverCell || state.drag) return;
+      state.hoverCell = null;
+      paintOverlay();
+      updateCell();
+    });
   }
+  initializeActionTable();
 
   const pending = { current: null, reference: null };
   function selectors() {

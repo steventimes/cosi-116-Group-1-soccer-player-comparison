@@ -185,10 +185,60 @@
             <p class="cell-place" id="cell-place">
               Hover over either field for action counts.
             </p>
+            <p class="small">
+              Keyboard: focus a field and use the arrow keys. Escape clears.
+            </p>
             <div id="cell-details" class="cell-rows"></div>
           </section>
         </aside>
       </div>
+      <section class="panel actions-panel" aria-labelledby="actions-title">
+        <div class="map-title">
+          <h2 id="actions-title">Actions in the selected area</h2>
+          <p class="small">
+            Follows the area chosen on either field. Unknown outcomes stay
+            listed.
+          </p>
+        </div>
+        <div class="actions-tools">
+          <div role="group" aria-label="Profile shown in the table">
+            <button type="button" data-action-side="current"></button
+            ><button type="button" data-action-side="reference"></button>
+          </div>
+          <div role="group" aria-label="Action type filter">
+            <button type="button" data-action-filter="all">All</button
+            ><button type="button" data-action-filter="pass">Passes</button
+            ><button type="button" data-action-filter="shot">Shots</button
+            ><button type="button" data-action-filter="other">Other</button>
+          </div>
+          <button type="button" id="actions-csv" class="actions-csv">
+            Download CSV
+          </button>
+        </div>
+        <p id="actions-count" class="small actions-count" aria-live="polite"></p>
+        <div
+          id="actions-scroll"
+          class="actions-scroll"
+          tabindex="0"
+          role="region"
+          aria-label="Action list, scroll with arrow keys"
+        >
+          <table class="actions-table">
+            <thead>
+              <tr>
+                <th scope="col">Match date</th>
+                <th scope="col">Time</th>
+                <th scope="col">Type</th>
+                <th scope="col">Outcome</th>
+                <th scope="col">Length</th>
+                <th scope="col">Width</th>
+              </tr>
+            </thead>
+            <tbody id="actions-body"></tbody>
+          </table>
+        </div>
+        <p id="actions-empty" class="actions-empty" hidden></p>
+      </section>
       <p class="footer">
         Partial tournament samples. Heat shows where ball actions occur, not
         running paths or time spent in an area.
