@@ -1,7 +1,7 @@
-# Player activity
+# Player comparison application
 
-This folder contains the browser application and its sample data. See the [repository README](../README.md) for setup, controls, metric definitions, and the source file map.
+Serve the repository root and open its index.html. Search players or competition editions, then open a profile on either comparison side. Counts and coverage labels describe partial located-event samples.
 
-The application uses native JavaScript modules. Run it through the local server described in the repository README so that the browser can load the JSON file.
+Both profiles use the same rectangular area and heatmap scale. Passing and shooting rates show their numerators and denominators. Unknown pass outcomes and unknown shot-target classifications remain in the data but are excluded from their corresponding known-outcome rate denominators. No attempts display a dash.
 
-The loader checks coordinates, outcomes, and identifiers before rendering. Identical coordinates can represent different actions. Action identifiers, when supplied, must be unique within a player's season. The current sample has no action identifiers.
+The Sprint 1 green, yellow and red heatmap, pointer hover counts, presets and reset remain available. Source adapters fetch only the requested profiles, verify fixed SHA-256 hashes before parsing and convert provider coordinates into field percentages. Failed selections keep the accepted comparison visible and provide Retry. See data/README.md for the source index contract. Raw match files remain external.
