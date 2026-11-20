@@ -1,25 +1,34 @@
 import { GRID_HEIGHT, GRID_WIDTH, isWholeField } from "./model.js";
 
 const element = (id) => document.getElementById(id);
-const palette = [
-  [47, 100, 73],
-  [149, 180, 65],
-  [238, 214, 63],
-  [243, 142, 40],
-  [218, 64, 27],
-];
 
-export function createPitchRenderer(grids, maximum) {
-  const colorScale = window.d3
-    .scaleLinear()
-    .domain(palette.map((_, i) => (i / (palette.length - 1)) * (maximum || 1)))
-    .range(palette.map((c) => `rgb(${c.join(",")})`))
-    .clamp(true);
-  const color = (value) => {
-    const c = window.d3.color(colorScale(value));
-    return [c.r, c.g, c.b];
-  };
+// One fixed domain, so a shade means the same thing for every pitch, player and
+// competition regardless of which profiles happen to be loaded.
+// ponytail: measured once over all 99 indexed profiles: field-player peaks 0.31–1.81%,
+// 99.5th percentile of all cells 0.81%; goalkeeper boxes reach 4.3% and clamp to the
+// darkest shade. Re-measure if the source index gains very different profiles.
+// Square root spreads the many low cells (a uniform spread is ~0.1%) across the ramp.
+const DENSITY_MAX = 1;
+const interpolate = window.d3.interpolateGreens;
+const colorScale = window.d3
+  .scaleSequentialSqrt(interpolate)
+  .domain([0, DENSITY_MAX])
+  .clamp(true);
+const color = (value) => {
+  const c = window.d3.color(colorScale(value));
+  return [c.r, c.g, c.b];
+};
 
+export function paintLegend() {
+  const stops = window.d3.range(0, 1.001, 0.1).map(interpolate);
+  element("heat-gradient").style.background =
+    `linear-gradient(90deg, ${stops.join(", ")})`;
+  // The bar's midpoint is a quarter of the domain on a square-root scale.
+  element("heat-scale-mid").textContent = `${DENSITY_MAX / 4}%`;
+  element("heat-scale-max").textContent = `≥ ${DENSITY_MAX}%`;
+}
+
+export function createPitchRenderer(grids) {
   function drawHeat(kind, player, season) {
     const canvas = element(`heat-${kind}`);
     const context = canvas.getContext("2d");

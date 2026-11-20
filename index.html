@@ -125,14 +125,17 @@
           <div class="scale">
             <span>Action density</span>
             <div>
-              <div class="gradient"></div>
+              <div class="gradient" id="heat-gradient"></div>
               <div class="scale-values">
-                <span>0%</span><span id="heat-scale-max"></span>
+                <span>0%</span><span id="heat-scale-mid"></span
+                ><span id="heat-scale-max"></span>
               </div>
             </div>
             <span class="density-unit"
-              >Smoothed % of all actions per grid cell.<br />Same scale for
-              every player and season.</span
+              >Smoothed % of a profile's actions per grid cell. Darker means
+              more concentrated.<br />One fixed scale for both fields, every
+              player and every competition. Cells at or above the top value use
+              the darkest shade.</span
             >
           </div>
           <div class="selection-tools">

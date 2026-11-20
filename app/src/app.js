@@ -1,5 +1,5 @@
 import { AREAS, WHOLE_FIELD, densityIndex } from "./model.js";
-import { createPitchRenderer } from "./pitch.js";
+import { createPitchRenderer, paintLegend } from "./pitch.js";
 import { loadDataset } from "./data.js";
 import { renderComparison, renderLocalDetails } from "./comparison.js";
 
@@ -20,13 +20,11 @@ function createApplication(data) {
       .find((p) => p.id === player)
       ?.profiles.find((p) => p.season === season);
   let pitch;
-  let maximum;
   function rebuildPitch() {
-    const density = densityIndex(data);
-    maximum = density.maximum;
-    pitch = createPitchRenderer(density.grids, maximum);
+    pitch = createPitchRenderer(densityIndex(data).grids);
   }
   rebuildPitch();
+  paintLegend();
   const paintOverlay = (region = state.selection) =>
     pitch.paintOverlay(region, state.hoverCell);
   function updateCell() {
@@ -47,8 +45,6 @@ function createApplication(data) {
       element("current-label").textContent;
     element("legend-reference").textContent =
       element("reference-label").textContent;
-    element("heat-scale-max").textContent =
-      `${maximum.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
     document.querySelectorAll("[data-season]").forEach((button) => {
       button.setAttribute(
         "aria-pressed",
