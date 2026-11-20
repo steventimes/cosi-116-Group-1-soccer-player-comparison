@@ -3,19 +3,9 @@ import { GRID_HEIGHT, GRID_WIDTH, isWholeField } from './model.js';
 const element = id => document.getElementById(id);
 const palette = [[47, 100, 73], [149, 180, 65], [238, 214, 63], [243, 142, 40], [218, 64, 27]];
 
-function svg(tag, attributes) {
-  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
-  return node;
-}
-
 export function createPitchRenderer(grids, maximum) {
-  function color(value) {
-    const position = (maximum ? Math.min(1, value / maximum) : 0) * (palette.length - 1);
-    const index = Math.min(palette.length - 2, Math.floor(position));
-    const weight = position - index;
-    return palette[index].map((channel, i) => Math.round(channel * (1 - weight) + palette[index + 1][i] * weight));
-  }
+  const colorScale = window.d3.scaleLinear().domain(palette.map((_, i) => i / (palette.length - 1) * (maximum || 1))).range(palette.map(c => `rgb(${c.join(',')})`)).clamp(true);
+  const color = value => { const c = window.d3.color(colorScale(value)); return [c.r, c.g, c.b]; };
 
   function drawHeat(kind, player, season) {
     const canvas = element(`heat-${kind}`);
@@ -38,11 +28,10 @@ export function createPitchRenderer(grids, maximum) {
   function initializePitch(kind) {
     const pitch = element(`pitch-${kind}`);
     pitch.innerHTML = '<rect class="pitch-line" x=".4" y=".4" width="99.2" height="64.2"/><path class="pitch-line" d="M50 .4V64.6 M.4 17H17V48H.4 M99.6 17H83V48H99.6 M.4 25H6V40H.4 M99.6 25H94V40H99.6"/><circle class="pitch-line" cx="50" cy="32.5" r="8.7"/><circle class="pitch-line" cx="50" cy="32.5" r=".45"/>';
-    pitch.append(
-      svg('path', { class: 'outside', 'fill-rule': 'evenodd' }),
-      svg('rect', { class: 'selection', hidden: 'true' }),
-      svg('rect', { class: 'hover-cell', hidden: 'true' }),
-    );
+    for (const [tag, attrs] of [['path', {class: 'outside', 'fill-rule': 'evenodd'}], ['rect', {class: 'selection', hidden: true}], ['rect', {class: 'hover-cell', hidden: true}]]) {
+      const node = window.d3.select(pitch).append(tag);
+      Object.entries(attrs).forEach(([key, value]) => node.attr(key, value));
+    }
   }
 
   function paintOverlay(region, hoverCell) {
