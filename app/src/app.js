@@ -10,6 +10,8 @@ import { renderComparison, renderLocalDetails } from './comparison.js';
 const element = id => document.getElementById(id);
 
 function createApplication(data) {
+  data.players = data.players.map(p => ({ ...p, profiles: p.profiles.filter(x => x.events !== null) })).filter(p => p.profiles.length);
+  data.seasons = [...new Set(data.players.flatMap(p => p.profiles.map(x => x.season)))];
   const state = {
     player: data.players[0].id,
     season: data.seasons.at(-1),
@@ -21,7 +23,7 @@ function createApplication(data) {
   const { grids, maximum } = densityIndex(data);
   const pitch = createPitchRenderer(grids, maximum);
   const paintOverlay = (region = state.selection) => pitch.paintOverlay(region, state.hoverCell);
-  const profile = season => data.players.find(player => player.id === state.player).profiles.find(item => item.season === season);
+  const profile = season => data.players.find(player => player.id === state.player).profiles.find(item => item.season === season) ?? {season, events: []};
 
   function updateCell() {
     renderLocalDetails(profile(state.season), profile(state.reference), state.selection, state.hoverCell);

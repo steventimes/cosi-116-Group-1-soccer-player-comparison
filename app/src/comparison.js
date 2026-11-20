@@ -36,9 +36,9 @@ export function renderComparison(current, reference, selection) {
   const whole = isWholeField(region);
   element('stats-scope').textContent = whole ? 'Whole field' : 'Selected area';
   element('metrics').innerHTML = [
-    metric('Pass completion', 'Completed passes / attempted passes', 'completed', 'passes', selected, previous),
+    metric('Pass completion', 'Completed passes / passes with known outcome', 'completed', 'knownPasses', selected, previous),
     metric('Shot conversion', 'Goals / attempted shots', 'goals', 'shots', selected, previous),
-    metric('Shots on target', 'Shots directed within the goal frame / shots', 'onTarget', 'shots', selected, previous),
+    metric('Shots on target', 'On-target shots / shots with known target classification', 'onTarget', 'knownTargetShots', selected, previous),
   ].join('');
   const scope = whole ? 'Whole field' : `Selected area · length ${format(region.x0, 0)}–${format(region.x1, 0)}%, width ${format(region.y0, 0)}–${format(region.y1, 0)}%`;
   element('selection-summary').innerHTML = `${scope}<br><span>${current.season}: ${selected.n} sample actions · ${reference.season}: ${previous.n} sample actions</span>`;

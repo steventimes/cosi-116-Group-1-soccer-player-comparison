@@ -11,23 +11,50 @@ export const AREAS = {
 };
 
 export function isWholeField(region) {
-  return region.x0 === 0 && region.y0 === 0 && region.x1 === 100 && region.y1 === 100;
+  return (
+    region.x0 === 0 && region.y0 === 0 && region.x1 === 100 && region.y1 === 100
+  );
 }
 
 export function inside(event, region) {
-  return event.x >= region.x0 && event.x <= region.x1 && event.y >= region.y0 && event.y <= region.y1;
+  return (
+    event.x >= region.x0 &&
+    event.x <= region.x1 &&
+    event.y >= region.y0 &&
+    event.y <= region.y1
+  );
 }
 
 export function summarize(events) {
-  const totals = { n: events.length, passes: 0, completed: 0, shots: 0, goals: 0, onTarget: 0 };
+  // Unknown outcomes stay in event counts; only known classifications enter their rate denominators.
+  const totals = {
+    n: events.length,
+    passes: 0,
+    knownPasses: 0,
+    unknownPasses: 0,
+    completed: 0,
+    shots: 0,
+    goals: 0,
+    onTarget: 0,
+    knownTargetShots: 0,
+    unknownShotTargets: 0,
+  };
   for (const event of events) {
     if (event.type === 'pass') {
       totals.passes += 1;
-      if (event.complete) totals.completed += 1;
+      if (event.complete === null) totals.unknownPasses += 1;
+      else {
+        totals.knownPasses += 1;
+        if (event.complete) totals.completed += 1;
+      }
     } else if (event.type === 'shot') {
       totals.shots += 1;
       if (event.goal) totals.goals += 1;
-      if (event.onTarget) totals.onTarget += 1;
+      if (event.onTarget === null) totals.unknownShotTargets += 1;
+      else {
+        totals.knownTargetShots += 1;
+        if (event.onTarget) totals.onTarget += 1;
+      }
     }
   }
   return totals;
@@ -37,8 +64,14 @@ export function density(events) {
   const bins = Array(GRID_WIDTH * GRID_HEIGHT).fill(0);
   const grid = Array(GRID_WIDTH * GRID_HEIGHT).fill(0);
   for (const event of events) {
-    const x = Math.min(GRID_WIDTH - 1, Math.floor(event.x / 100 * GRID_WIDTH));
-    const y = Math.min(GRID_HEIGHT - 1, Math.floor(event.y / 100 * GRID_HEIGHT));
+    const x = Math.min(
+      GRID_WIDTH - 1,
+      Math.floor((event.x / 100) * GRID_WIDTH),
+    );
+    const y = Math.min(
+      GRID_HEIGHT - 1,
+      Math.floor((event.y / 100) * GRID_HEIGHT),
+    );
     bins[y * GRID_WIDTH + x] += 1;
   }
   for (let y = 0; y < GRID_HEIGHT; y += 1) {
@@ -49,22 +82,25 @@ export function density(events) {
           const xx = x + dx;
           const yy = y + dy;
           if (xx >= 0 && xx < GRID_WIDTH && yy >= 0 && yy < GRID_HEIGHT) {
-            grid[yy * GRID_WIDTH + xx] += bins[y * GRID_WIDTH + x] * Math.exp(-(dx * dx + dy * dy) / (2 * 1.15 * 1.15));
+            grid[yy * GRID_WIDTH + xx] +=
+              bins[y * GRID_WIDTH + x] *
+              Math.exp(-(dx * dx + dy * dy) / (2 * 1.15 * 1.15));
           }
         }
       }
     }
   }
   const total = grid.reduce((sum, value) => sum + value, 0);
-  return total ? grid.map(value => 100 * value / total) : grid;
+  return total ? grid.map((value) => (100 * value) / total) : grid;
 }
 
 export function densityIndex(data) {
+  // One maximum keeps the sequential color scale comparable across every available profile.
   const grids = new Map();
   let maximum = 0;
   for (const player of data.players) {
     for (const profile of player.profiles) {
-      const grid = density(profile.events);
+      const grid = density(profile.events ?? []);
       grids.set(`${player.id}_${profile.season}`, grid);
       maximum = Math.max(maximum, ...grid);
     }
