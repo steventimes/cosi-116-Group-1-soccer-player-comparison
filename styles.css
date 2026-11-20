@@ -647,3 +647,98 @@ td {
 @media (max-width: 600px) {
   .controls { grid-template-columns: 1fr; }
 }
+
+/* Local action details table */
+.actions-panel {
+  border-top: 1px solid var(--line);
+  margin-top: 26px;
+  padding-top: 20px;
+}
+.actions-panel .map-title {
+  margin-bottom: 14px;
+}
+.actions-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.actions-tools [role="group"] {
+  display: flex;
+  flex-wrap: wrap;
+}
+.actions-tools button {
+  border: 1px solid #b8c3bb;
+  background: #fff;
+  padding: 7px 12px;
+  min-height: 38px;
+  font-size: 13px;
+}
+.actions-tools [role="group"] button + button {
+  margin-left: -1px;
+}
+.actions-tools button:hover {
+  border-color: var(--text);
+  background: #f3f5f2;
+}
+.actions-tools button[aria-pressed="true"] {
+  background: var(--text);
+  border-color: var(--text);
+  color: #fff;
+}
+.actions-tools .actions-csv {
+  margin-left: auto;
+}
+.actions-tools button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.actions-count {
+  margin-top: 12px;
+}
+.actions-scroll {
+  max-height: 340px;
+  overflow: auto;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+}
+.actions-table {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.actions-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f3f5f2;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.actions-table td {
+  border-bottom: 1px solid var(--line);
+}
+.actions-table .number {
+  text-align: right;
+}
+.actions-table tr.unusual td {
+  font-style: italic;
+  color: var(--muted);
+}
+.actions-empty {
+  margin-top: 10px;
+  padding: 12px 15px;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+@media (max-width: 520px) {
+  .actions-tools .actions-csv {
+    margin-left: 0;
+  }
+  .actions-table {
+    font-size: 12px;
+  }
+  .actions-table th,
+  .actions-table td {
+    padding: 5px 4px;
+  }
+}
