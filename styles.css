@@ -623,3 +623,27 @@ td {
 .overview {
   overflow: auto;
 }
+
+/* Keep profile coverage aligned with the two comparison selectors. */
+.controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+.controls > div { min-width: 0; }
+.controls label {
+  display: inline-flex;
+  flex-direction: column;
+  max-width: 100%;
+  margin: 0 12px 8px 0;
+}
+.controls select { max-width: 100%; }
+.coverage-details {
+  font-size: .85rem;
+  overflow-wrap: anywhere;
+  max-width: 42rem;
+}
+.coverage-details p { margin: .35rem 0; }
+.coverage-details p:first-child { font-weight: 600; }
+@media (max-width: 600px) {
+  .controls { grid-template-columns: 1fr; }
+}

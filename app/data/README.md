@@ -14,3 +14,21 @@ Player IDs identify the same player across editions. A profile's `providerPlayer
 Every match has an `eventPath` for a local verification cache and a SHA-256 hash for the original response. StatsBomb matches use the pinned `rawBaseUrl`. HuffPost / Opta matches identify their provider and use an explicit `eventUrl`. The top-level Git commit identifies StatsBomb only; the additional source is pinned by individual response hashes.
 
 Profile summaries describe retained, located actions. StatsBomb is pinned by Git commit; HuffPost / Opta files are pinned by their response hashes.
+
+## Validation and coverage
+
+The loader verifies each complete response against the existing SHA-256 before parsing. It then checks the requested player's records before plotting. Missing identifiers, repeated supplied IDs, absent locations, and malformed or out-of-bounds coordinates are counted separately. Coordinates are rejected rather than clamped. A null or non-object event row fails loading with its match ID. An otherwise valid unfamiliar action remains `other`.
+
+Each loaded profile includes `coverage.validation` and `coverage.includedMatchIds`. Included IDs describe the files checked, even when a file supplies no usable location records for that player. The existing `coverage.matchIds` still describes matches with retained located actions. Counts are per player, so exclusions for another player do not appear in the selected player's notes.
+
+The coverage label is `available` only where the index's `focusCoverage` records all expected appearances with none missing. This describes indexed appearance coverage, not complete locations, a full tournament or tracking data. Other nonempty samples are `partial`. No located events produces `missing-location`; a failed request, hash check or validation produces a load-failure message and leaves the accepted comparison visible. Retry clears the matching in-memory dataset cache.
+
+Unknown passes and Opta shot-target classifications remain null and keep the existing rate denominators. StatsBomb shots without a recognized outcome retain the baseline exclusion rule and are reported separately. Missing positions are counted, never converted into invented spatial events. A missing location can also be normal for a non-located source event; the notes are not a claim that every excluded row is corrupt.
+
+### Coordinate checks
+
+- **StatsBomb:** [pinned event specification, Appendix 2](https://github.com/hudl/open-data/blob/4b73468fc5b0f1950f9f66fada70ad3a4f9327cb/doc/Open%20Data%20Events%20v4.0.0.pdf) shows a 120 by 80 frame with (0,0) at top left and (120,80) at bottom right. The adapter uses `x / 120 * 100` and `y / 80 * 100`.
+- **HuffPost / Opta:** the [original match page](https://data.huffingtonpost.com/2014/world-cup/matches/brazil-vs-croatia-731767) credits Opta. Its [original pitch script](https://e.huffpost.com/datadot/assets/worldcup_match-9c1067f357c2c59fccc044dfb37c2b3a.js) defines x on [0,100] and screen y on [100,0]. Its opposing-team scales reverse both axes to display teams against one another. Our separate, attack-aligned pitches use `x` and `100 - y`.
+- **Direction sanity check:** across the 21 verified files used in these checks, non-shootout shot median x values were 104.2, 106.5, 97.6 and 105.85 for StatsBomb periods 1-4, and 83.15, 82.5, 86.85 and 84.7 for HuffPost. These observed samples support the existing attack-toward-increasing-x convention in every period. No extra team or half flip was added. This is a sample check, not independent proof for every possible provider export.
+
+The source index and hashes are unchanged. Both providers describe ball actions and have different annotation sets; their raw action volumes are not equivalent measures of ability.

@@ -40,7 +40,7 @@ export function convertHuffPostEvent(event, match, stats, seen) {
     else stats.nonSpatialEvents += 1;
     return null;
   }
-  if (typeof event.id !== 'string' || !event.id) {
+  if (typeof event.id !== 'string' || !event.id.trim()) {
     stats.missingEventId += 1;
     return null;
   }
@@ -54,11 +54,11 @@ export function convertHuffPostEvent(event, match, stats, seen) {
     stats.nonSpatialEvents += 1;
     return null;
   }
-  if (!Number.isFinite(event.x) || !Number.isFinite(event.y)) {
+  if (event.x == null || event.y == null) {
     stats.missingLocation += 1;
     return null;
   }
-  if (event.x < 0 || event.x > 100 || event.y < 0 || event.y > 100) {
+  if (!Number.isFinite(event.x) || !Number.isFinite(event.y) || event.x < 0 || event.x > 100 || event.y < 0 || event.y > 100) {
     stats.invalidLocation += 1;
     return null;
   }

@@ -30,7 +30,7 @@ function outcomeName(value) {
 export function convertStatsBombEvent(event, match, stats, seen) {
   stats.sourcePlayerEvents += 1;
 
-  if (typeof event.id !== 'string' || !event.id) {
+  if (typeof event.id !== 'string' || !event.id.trim()) {
     stats.missingEventId += 1;
     return null;
   }
@@ -42,12 +42,12 @@ export function convertStatsBombEvent(event, match, stats, seen) {
   seen.add(eventKey);
 
   const location = event.location;
-  if (
-    !Array.isArray(location) ||
-    location.length < 2 ||
-    !location.slice(0, 2).every(Number.isFinite)
-  ) {
+  if (location == null) {
     stats.missingLocation += 1;
+    return null;
+  }
+  if (!Array.isArray(location) || location.length < 2 || !location.slice(0, 2).every(Number.isFinite)) {
+    stats.invalidLocation += 1;
     return null;
   }
   const [rawX, rawY] = location;
