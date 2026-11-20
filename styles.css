@@ -5,7 +5,7 @@
   --line: #dce2dd;
   --current: #b4552e;
   --reference: #496a80;
-  --pitch: #2f6449;
+  --pitch: #f7fcf5; /* lowest heat shade, shown before the canvas paints */
 }
 * {
   box-sizing: border-box;
@@ -190,26 +190,27 @@ h3 {
 }
 .pitch-line {
   fill: none;
-  stroke: #e2eee5;
-  stroke-opacity: 0.72;
+  stroke: #4a5a52;
+  stroke-opacity: 0.6;
   stroke-width: 0.35;
 }
 .selection {
   fill: none;
-  stroke: white;
-  stroke-width: 0.5;
+  stroke: var(--text);
+  stroke-width: 0.6;
   stroke-dasharray: 1.2 0.7;
   pointer-events: none;
 }
 .hover-cell {
-  fill: #fff2;
-  stroke: white;
+  fill: none;
+  stroke: var(--text);
   stroke-width: 0.35;
   pointer-events: none;
 }
+/* Fade, never darken: on this ramp darker already means more actions. */
 .outside {
-  fill: #11261b;
-  opacity: 0.58;
+  fill: #fff;
+  opacity: 0.7;
   pointer-events: none;
 }
 .directions {
@@ -232,15 +233,8 @@ h3 {
   line-height: 12px;
 }
 .gradient {
-  height: 8px;
-  background: linear-gradient(
-    90deg,
-    #2f6449,
-    #95b441,
-    #eed63f,
-    #f38e28,
-    #da401b
-  );
+  height: 10px;
+  border: 1px solid var(--line);
 }
 .scale-values {
   display: flex;
