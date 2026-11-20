@@ -67,7 +67,7 @@ function requestSignal(parentSignal) {
   };
 }
 
-function emptyStats() {
+export function emptyStats() {
   return {
     sourcePlayerEvents: 0,
     retainedEvents: 0,
@@ -88,7 +88,7 @@ function emptyProfiles() {
   return new Map(sourceIndex.players.map((player) => [player.id, new Map()]));
 }
 
-function addToProfiles(
+export function addToProfiles(
   profiles,
   statsBySeason,
   match,
@@ -98,9 +98,32 @@ function addToProfiles(
 ) {
   const huffPost = match.sourceId === 'huffpost-opta';
   const convertEvent = huffPost ? convertHuffPostEvent : convertStatsBombEvent;
-  const stats = statsBySeason.get(match.season);
+  const seasonStats = statsBySeason.get(match.season);
   const retainedPlayerIds = new Set();
+  for (const playerId of playerIds) {
+    if (!PROFILE_MATCH_IDS.get(playerId)?.get(match.season)?.has(match.matchId))
+      continue;
+    const playerProfiles = profiles.get(playerId);
+    if (!playerProfiles.has(match.season)) {
+      playerProfiles.set(match.season, {
+        season: match.season,
+        coverage: {
+          matches: 0,
+          matchIds: [],
+          includedMatchIds: [],
+          note: 'Partial sample',
+          unknownPasses: 0,
+          validation: emptyStats(),
+        },
+        events: [],
+      });
+    }
+    playerProfiles.get(match.season).coverage.includedMatchIds.push(match.matchId);
+  }
   for (const event of events) {
+    if (!event || typeof event !== 'object' || Array.isArray(event)) {
+      throw new Error(`Match ${match.matchId} contains an invalid event record.`);
+    }
     const playerId = huffPost
       ? HUFFPOST_PLAYER_IDS.get(match.season)?.get(event.player_id)
       : String(event.player?.id ?? '');
@@ -111,23 +134,14 @@ function addToProfiles(
     // StatsBomb excludes shootouts before counting source-player events. Opta counts
     // them as explicit exclusions inside its converter, preserving the source contracts.
     if (!huffPost && Number(event.period) >= 5) continue;
+    const stats = profiles.get(playerId).get(match.season).coverage.validation;
+    const before = { ...stats };
     const action = convertEvent(event, match, stats, seen);
+    for (const key of Object.keys(stats))
+      seasonStats[key] += stats[key] - before[key];
     if (!action) continue;
     const playerProfiles = profiles.get(playerId);
-    let profile = playerProfiles.get(match.season);
-    if (!profile) {
-      profile = {
-        season: match.season,
-        coverage: {
-          matches: 0,
-          matchIds: [],
-          note: 'Partial sample',
-          unknownPasses: 0,
-        },
-        events: [],
-      };
-      playerProfiles.set(match.season, profile);
-    }
+    const profile = playerProfiles.get(match.season);
     profile.events.push(action);
     retainedPlayerIds.add(playerId);
     if (action.type === 'pass' && action.complete === null)
@@ -215,6 +229,7 @@ export async function loadSourceDataset({
   onProgress = () => {},
   signal,
   fetchImpl = fetch,
+  retry = false,
 } = {}) {
   if (!sourceIndex.seasons.includes(season))
     throw new Error(`Unknown competition edition ${season}.`);
@@ -247,6 +262,7 @@ export async function loadSourceDataset({
     matches.map((match) => match.matchId),
   ]);
   signal?.throwIfAborted();
+  if (retry) datasetCache.delete(cacheKey);
   if (datasetCache.has(cacheKey)) return datasetCache.get(cacheKey);
   if (!globalThis.crypto?.subtle)
     throw new Error(
@@ -299,6 +315,7 @@ export async function loadSourceDataset({
       profile.coverage.matchIds.sort(
         (left, right) => matchOrder.get(left) - matchOrder.get(right),
       );
+      profile.coverage.includedMatchIds.sort((left, right) => matchOrder.get(left) - matchOrder.get(right));
       profile.coverage.matches = profile.coverage.matchIds.length;
       profile.events.sort(
         (left, right) =>
@@ -339,6 +356,8 @@ export async function loadSourceDataset({
         return {
           season: entry.season,
           summary: entry.summary,
+          sourceId: sourceIndex.editions.find((edition) => edition.season === entry.season)?.sourceId ?? 'statsbomb',
+          appearanceCoverage: sourceIndex.focusCoverage?.find((item) => item.playerId === player.id && item.season === entry.season) ?? null,
           loadState: isLoaded ? 'loaded' : 'not loaded',
           coverage: loaded
             ? { ...loaded.coverage, note: entry.summary.note }

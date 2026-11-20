@@ -1,3 +1,4 @@
+import { coverageText, renderCoverage } from "./coverage.js";
 import { AREAS, WHOLE_FIELD, densityIndex } from "./model.js";
 import { createPitchRenderer } from "./pitch.js";
 import { loadDataset } from "./data.js";
@@ -64,6 +65,8 @@ function createApplication(data) {
       state.selection,
     );
     updateCell();
+    renderCoverage(element("coverage-current"), profile(state.season));
+    renderCoverage(element("coverage-reference"), profile(state.reference, state.other));
   }
 
   function clearArea() {
@@ -194,7 +197,9 @@ function createApplication(data) {
       render();
     } catch (e) {
       if (controller.signal.aborted) return;
-      error.textContent = e.message;
+      const name = data.players.find((p) => p.id === playerId).name;
+      error.dataset.coverageState = "load-failure";
+      error.textContent = `Load failed for ${name}, ${season}. ${e.message} The previous comparison is still shown.`;
       error.hidden = false;
       again.hidden = false;
       again.onclick = () => choose(side, playerId, season, true);
@@ -248,9 +253,7 @@ function createApplication(data) {
         row
           .append("td")
           .text(
-            profile.summary.retainedEvents
-              ? `${profile.summary.matches} matches · Partial sample`
-              : "No location events",
+            coverageText(profile),
           );
         for (const [side, label] of [
           ["current", "Compare A"],
